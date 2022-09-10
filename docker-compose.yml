@@ -1,0 +1,36 @@
+# docker network create -d bridge --gateway 172.22.0.1 --subnet 172.22.0.0/24 --attachable x_private_network
+
+version: '3'
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    networks:
+      default:
+        ipv4_address: 172.22.0.10
+    volumes:
+      - "./mysql_data:/var/lib/mysql"
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+  phpmyadmin_web:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8001:80"
+    volumes:
+      - './phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php'
+    environment:
+      PMA_HOST: mysql_db 
+      UPLOAD_LIMIT: 50000000
+    networks:
+      default:
+        ipv4_address: 172.22.0.11
+
+networks:
+  default:
+    external:
+      name: x_private_network
