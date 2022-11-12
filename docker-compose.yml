@@ -1,7 +1,7 @@
-# to setup the docker first you create a network using the below docker cmd
-# docker network create -d bridge --gateway 172.22.0.1 --subnet 172.22.0.0/24 --attachable x_private_network
+# docker network create -d bridge --gateway 172.22.0.1 --subnet 172.22.0.0/24 --attachable my_private_network
+# mysql -h 172.22.0.10 -u root -p'password'
 
-version: '3'
+version: '3.1'
 services:
   mysql_db:
     image: mysql:8.0
@@ -14,8 +14,13 @@ services:
     restart: always
     ports:
       - "3306:3306"
+    # command: --default-authentication-plugin=mysql_native_password
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_ROOT_HOST: '%'
   phpmyadmin_web:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -23,7 +28,7 @@ services:
     ports:
       - "8001:80"
     volumes:
-      - './phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php'
+      - './config.user.inc.php:/etc/phpmyadmin/config.user.inc.php'
     environment:
       PMA_HOST: mysql_db 
       UPLOAD_LIMIT: 50000000
@@ -34,4 +39,4 @@ services:
 networks:
   default:
     external:
-      name: x_private_network
+      name: my_private_network
